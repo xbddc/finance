@@ -160,7 +160,7 @@ class Transactions extends React.Component<Props, State> {
             <SelectReactTable
               columns={TABLE_COLUMNS}
               data={tableData}
-              defaultSorted={[{ desc: false, id: 'symbol' }]}
+              defaultSorted={[{ desc: true, id: 'date' }]}
               getPaginationProps={() => ({
                 className: 'pt-2',
                 NextComponent: props => <Button className="btn-sm" outline {...props} />,
