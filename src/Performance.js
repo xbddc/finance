@@ -320,6 +320,7 @@ class Performance extends React.Component<Props, State> {
                 className: 'pt-2',
                 showPageJump: false,
               })}
+              minRows={3}
               isSelected={this.isSymbolSelected}
               keyField="symbol"
               noDataText="No symbols yet. Add one using the form below."

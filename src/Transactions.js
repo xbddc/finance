@@ -167,6 +167,7 @@ class Transactions extends React.Component<Props, State> {
                 PreviousComponent: props => <Button className="btn-sm" outline {...props} />,
                 showPageJump: false,
               })}
+              minRows={3}
               isSelected={this.isTransactionIdSelected}
               keyField="id"
               noDataText="No transactions yet. Add one using the form below."
