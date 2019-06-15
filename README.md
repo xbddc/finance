@@ -115,10 +115,11 @@ updates on when that data might become available.
 2. Use [Yarn][7] to install dependencies
 
        $ yarn install
-3. (Optional) To develop and make changes, use `start`
+3. Modify your IEX_TOKEN variable in `src/actions.js`, which yan can retrieve it from https://iexcloud.io/
+4. (Optional) To develop and make changes, use `start`
 
        $ yarn start
-4. Build the app for deployment
+5. Build the app for deployment
 
        $ yarn build
 

@@ -4,7 +4,8 @@ import type { Dispatch, GetState, Transaction } from './types';
 import csvParse from 'csv-parse/lib/es5/sync';
 import { transformGfToStocks } from './transformers';
 
-const IEX_ROOT = 'https://api.iextrading.com/1.0';
+const IEX_ROOT = 'https://cloud.iexapis.com/stable';
+const IEX_TOKEN = '__YOUR_TOKEN_HERE__';
 
 export function addSymbol(symbol: string) {
   return { symbol, type: 'ADD_SYMBOL' };
@@ -67,7 +68,7 @@ function clearFetchQuotesTimeout() {
 export function fetchSymbolData(symbol: string) {
   return function(dispatch: Dispatch) {
     dispatch({ type: 'FETCH_SYMBOL_DATA_REQUEST' });
-    fetch(`${IEX_ROOT}/stock/${symbol}/batch?types=chart,quote&range=1y`)
+    fetch(`${IEX_ROOT}/stock/${symbol}/batch?types=chart,quote&token=${IEX_TOKEN}&range=1y`)
       .then(response => {
         response
           .json()
@@ -108,7 +109,7 @@ export function fetchAllQuotes() {
     clearFetchQuotesTimeout();
     dispatch({ type: 'FETCH_QUOTES_REQUEST' });
     fetch(
-      `${IEX_ROOT}/stock/market/batch?types=quote&symbols=${encodeURIComponent(
+      `${IEX_ROOT}/stock/market/batch?types=quote&token=${IEX_TOKEN}&symbols=${encodeURIComponent(
         getState().symbols.join(',')
       )}`
     )
@@ -142,7 +143,7 @@ export function fetchAllQuotes() {
 export function fetchAllIexSymbols() {
   return function(dispatch: Dispatch) {
     dispatch({ type: 'FETCH_ALL_IEX_SYMBOLS_REQUEST' });
-    fetch(`${IEX_ROOT}/ref-data/symbols`)
+    fetch(`${IEX_ROOT}/ref-data/symbols?token=${IEX_TOKEN}`)
       .then(response => {
         response
           .json()
