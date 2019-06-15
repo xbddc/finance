@@ -133,10 +133,11 @@ const TABLE_COLUMNS = [
     headerClassName: 'text-right',
     Footer: props => {
       const totalCostBasis = props.data.reduce((total, current) => total + current.costBasis, 0);
+      const totalMarketValue = props.data.reduce((total, current) => total + current.marketValue, 0);
       return (
         <div className={classes(totalCostBasis)}>
           {totalCostBasis >= 0 ? '+' : ''}
-          {currencyFormatter.format(totalCostBasis)}
+          {currencyFormatter.format(totalMarketValue - totalCostBasis)}
         </div>
       );
     },
@@ -154,10 +155,7 @@ const TABLE_COLUMNS = [
     headerClassName: 'text-right',
     Footer: props => {
       const totalCostBasis = props.data.reduce((total, current) => total + current.costBasis, 0);
-      const totalMarketValue = props.data.reduce(
-        (total, current) => total + current.marketValue,
-        0
-      );
+      const totalMarketValue = props.data.reduce((total, current) => total + current.marketValue, 0);
       const totalGainPercent =
         totalMarketValue === 0 ? 0 : (totalMarketValue - totalCostBasis) / totalCostBasis;
       return (
@@ -259,37 +257,47 @@ class Performance extends React.Component<Props, State> {
       );
 
       let costBasis = 0;
+      let earnBasis = 0;
       let marketValue = 0;
       let totalShares = 0;
-      transactions.forEach(transaction => {
-        // Only summing 'Buy' transactions.
-        if (transaction.type !== 'Buy') return;
 
-        costBasis += transaction.price * transaction.shares;
-        costBasis += transaction.commission;
-        totalShares += transaction.shares;
-        if (quote != null) marketValue += quote.latestPrice * transaction.shares;
+      transactions.forEach(transaction => {
+        if (transaction.type.search('Buy') >=0) {
+          costBasis += transaction.price * transaction.shares;
+          costBasis += transaction.commission;
+          totalShares += transaction.shares;
+          if (quote != null) marketValue += quote.latestPrice * transaction.shares;
+        }
+        else if (transaction.type.search('Sell') >= 0) {
+          earnBasis += transaction.price * transaction.shares;
+          earnBasis -= transaction.commission;
+          totalShares -= transaction.shares;
+          if (quote != null) marketValue -= quote.latestPrice * transaction.shares;
+        }
       });
 
+      if (totalShares === 0) {
+        marketValue = earnBasis;
+      } else {
+        costBasis -= earnBasis;
+      }
       const gain = marketValue - costBasis;
+
       let gainPercent = 0;
       if (quote != null) gainPercent = gain / costBasis;
 
-      // Show returns only if the user owns shares and the quote has been returned from the API call.
-      // Showing any earlier will look like some erroneous and funky data.
-      const showReturns = totalShares > 0 && quote != null;
       return {
         change: {
           change: quote == null ? null : quote.change,
           changePercent: quote == null ? null : quote.changePercent,
         },
         companyName: quote == null ? null : quote.companyName,
-        costBasis: showReturns ? costBasis : null,
+        costBasis,
         daysGain: quote == null || totalShares === 0 ? null : quote.change * totalShares,
-        gain: showReturns ? gain : null,
-        gainPercent: showReturns ? gainPercent : null,
+        gain,
+        gainPercent,
         latestPrice: quote == null ? null : quote.latestPrice,
-        marketValue: showReturns ? marketValue : null,
+        marketValue,
         shares: totalShares,
         symbol,
       };

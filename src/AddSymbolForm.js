@@ -66,6 +66,8 @@ export default function AddSymbolForm(props: Props) {
                 type="select">
                 <option>Buy</option>
                 <option>Sell</option>
+                <option>Sell short</option>
+                <option>Buy to cover</option>
               </Input>
             </FormGroup>
             <FormGroup>

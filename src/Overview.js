@@ -214,7 +214,10 @@ class Overview extends React.Component<Props, State> {
       const transactions = this.props.transactions.filter(
         transaction => transaction.symbol === symbol
       );
-      const totalShares = transactions.reduce((prev, curr) => prev + curr.shares, 0);
+      const totalShares = transactions.reduce(
+        (prev, curr) => prev + curr.shares * (curr.type.search('Buy') >= 0 ? 1 : -1),
+        0
+      );
 
       return {
         change: {
