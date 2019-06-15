@@ -83,7 +83,7 @@ class Transactions extends React.Component<Props, State> {
     // If any currently selected transactions are not in the next props update, remove them from the
     // internal selected transactions `Set` to stay up-to-date.
     let hasChanges = false;
-    const nextTransactions = new Set(nextProps.transactions);
+    const nextTransactions = new Set(nextProps.transactions.map(transaction => transaction.id));
     const nextSelectedTransactionIds = new Set<number>();
     for (const transactionId of prevState.selectedTransactionIds) {
       if (nextTransactions.has(transactionId)) nextSelectedTransactionIds.add(transactionId);
