@@ -24,6 +24,7 @@ type Props = StateProps;
 
 type State = {
   selectedSymbols: Set<string>,
+  showClosedPosition: boolean,
 };
 
 const SelectReactTable = selectTableHOC(ReactTable);
@@ -212,8 +213,13 @@ class Performance extends React.Component<Props, State> {
       // This is *not* treated as immutable. Object identity will not always correctly indicate
       // when changes are made.
       selectedSymbols: new Set(),
+      showClosedPosition: false,
     };
   }
+
+  handleToggleClosedPosition = () => {
+    this.setState({ showClosedPosition: !!!this.state.showClosedPosition });
+  };
 
   handleDeleteSelectedSymbols = () => {
     this.props.dispatch(deleteSymbols(Array.from(this.state.selectedSymbols)));
@@ -263,7 +269,7 @@ class Performance extends React.Component<Props, State> {
       let totalShares = 0;
 
       transactions.forEach(transaction => {
-        if (transaction.type.search('Buy') >=0) {
+        if (transaction.type.search('Buy') >= 0) {
           costBasis += transaction.price * transaction.shares;
           costBasis += transaction.commission;
           totalShares += transaction.shares;
@@ -275,7 +281,17 @@ class Performance extends React.Component<Props, State> {
           totalShares -= transaction.shares;
           if (quote != null) marketValue -= quote.latestPrice * transaction.shares;
         }
+
+        if (!this.state.showClosedPosition && totalShares === 0) {
+          costBasis = 0;
+          earnBasis = 0;
+          marketValue = 0;
+        }
       });
+
+      if (!this.state.showClosedPosition && totalShares === 0) {
+        return null;
+      }
 
       if (totalShares === 0) {
         marketValue = earnBasis;
@@ -308,12 +324,14 @@ class Performance extends React.Component<Props, State> {
     return (
       <PortfolioContainer
         deleteDisabled={deleteDisabled}
+        showToggleClosedPositionButton={true}
+        onToggleClosedPosition={this.handleToggleClosedPosition}
         onDelete={this.handleDeleteSelectedSymbols}>
         <Row className="mb-4">
           <Col>
             <SelectReactTable
               columns={TABLE_COLUMNS}
-              data={tableData}
+              data={tableData.filter(Boolean)}
               defaultSorted={[{ desc: false, id: 'symbol' }]}
               getPaginationProps={() => ({
                 NextComponent: props => <Button className="btn-sm" outline {...props} />,

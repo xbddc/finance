@@ -17,8 +17,10 @@ import { connect } from 'react-redux';
 
 type OwnProps = {
   children?: React.Node,
+  showToggleClosedPositionButton: boolean,
   deleteDisabled: boolean,
   onDelete: () => void,
+  onToggleClosedPosition: () => void,
 };
 
 type StateProps = {
@@ -77,12 +79,20 @@ class PortfolioContainer extends React.Component<Props> {
           <Row className="mb-3 mt-3">
             <Col>
               <Button
+                className="mr-1"
                 color={this.props.deleteDisabled ? 'secondary' : 'danger'}
                 disabled={this.props.deleteDisabled}
                 onClick={this.props.onDelete}
                 outline
                 size="sm">
                 Delete
+              </Button>
+              <Button
+                className={this.props.showToggleClosedPositionButton ? '' : 'd-none'}
+                onClick={this.props.onToggleClosedPosition}
+                outline
+                size="sm">
+                Toggle closed positions
               </Button>
             </Col>
             <PortfolioActions
