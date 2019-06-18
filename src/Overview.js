@@ -23,6 +23,7 @@ type Props = StateProps & { dispatch: Dispatch };
 
 type State = {
   selectedSymbols: Set<string>,
+  showClosedPosition: boolean,
 };
 
 const SelectReactTable = selectTableHOC(ReactTable);
@@ -170,8 +171,13 @@ class Overview extends React.Component<Props, State> {
       // This is *not* treated as immutable. Object identity will not always correctly indicate
       // when changes are made.
       selectedSymbols: new Set(),
+      showClosedPosition: false,
     };
   }
+
+  handleToggleClosedPosition = () => {
+    this.setState({ showClosedPosition: !!!this.state.showClosedPosition });
+  };
 
   handleDeleteSelectedSymbols = () => {
     this.props.dispatch(deleteSymbols(Array.from(this.state.selectedSymbols)));
@@ -219,6 +225,10 @@ class Overview extends React.Component<Props, State> {
         0
       );
 
+      if (!this.state.showClosedPosition && totalShares === 0) {
+        return null;
+      }
+
       return {
         change: {
           change: quote == null ? null : quote.change,
@@ -240,12 +250,14 @@ class Overview extends React.Component<Props, State> {
     return (
       <PortfolioContainer
         deleteDisabled={deleteDisabled}
+        showToggleClosedPositionButton={true}
+        onToggleClosedPosition={this.handleToggleClosedPosition}
         onDelete={this.handleDeleteSelectedSymbols}>
         <Row className="mb-4">
           <Col>
             <SelectReactTable
               columns={TABLE_COLUMNS}
-              data={tableData}
+              data={tableData.filter(Boolean)}
               defaultSorted={[{ desc: false, id: 'symbol' }]}
               getPaginationProps={() => ({
                 className: 'pt-2',
