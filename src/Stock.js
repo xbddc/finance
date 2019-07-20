@@ -134,7 +134,7 @@ class Stock extends React.Component<Props> {
               />
               <SummaryListItem
                 title="Mkt. Cap"
-                value={quote == null ? '...' : abbreviatedNumberFormatter.format(quote.marketCap)}
+                value={quote == null ? '...' : abbreviatedNumberFormatter.format(quote.marketCap || 0)}
               />
               <SummaryListItem
                 title="P/E Ratio"

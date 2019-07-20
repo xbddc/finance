@@ -7,6 +7,9 @@ import { transformGfToStocks } from './transformers';
 const IEX_ROOT = 'https://cloud.iexapis.com/stable';
 const IEX_TOKEN = '__YOUR_TOKEN_HERE__';
 
+const TD_ROOT = 'https://api.tdameritrade.com/v1';
+const TD_TOKEN = '__YOUR_TOKEN_HERE__';
+
 export function addSymbol(symbol: string) {
   return { symbol, type: 'ADD_SYMBOL' };
 }
@@ -109,7 +112,7 @@ export function fetchAllQuotes() {
     clearFetchQuotesTimeout();
     dispatch({ type: 'FETCH_QUOTES_REQUEST' });
     fetch(
-      `${IEX_ROOT}/stock/market/batch?types=quote&token=${IEX_TOKEN}&symbols=${encodeURIComponent(
+      `${TD_ROOT}/marketdata/quotes?apikey=${TD_TOKEN}&symbol=${encodeURIComponent(
         getState().symbols.join(',')
       )}`
     )
@@ -123,7 +126,16 @@ export function fetchAllQuotes() {
             // See: https://iextrading.com/developer/docs/#batch-requests
             const nextQuotes = {};
             Object.keys(data).forEach(symbol => {
-              nextQuotes[symbol] = data[symbol].quote;
+              nextQuotes[symbol] = {
+                change: data[symbol].netChange,
+                changePercent: data[symbol].netPercentChangeInDouble / 100,
+                companyName: data[symbol].description,
+                high: data[symbol].highPrice,
+                latestPrice: data[symbol].lastPrice,
+                latestVolume: data[symbol].totalVolume,
+                low: data[symbol].lowPrice,
+                open: data[symbol].openPrice,
+              }
             });
             dispatch({ quotes: nextQuotes, type: 'FETCH_QUOTES_SUCCESS' });
           })

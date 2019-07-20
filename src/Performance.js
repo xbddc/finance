@@ -302,6 +302,7 @@ class Performance extends React.Component<Props, State> {
 
       let gainPercent = 0;
       if (quote != null) gainPercent = gain / costBasis;
+      if (totalShares < 0) gainPercent *= -1;
 
       return {
         change: {
