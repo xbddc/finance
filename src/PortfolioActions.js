@@ -6,6 +6,9 @@ import { Button, Col, Input, Label } from 'reactstrap';
 type Props = {
   onDeletePortfolio: () => void,
   onDownloadPortfolio: () => void,
+  onGetCodeFromTD: () => void,
+  onGetTokenFromTD: () => void,
+  onImportFromTD: () => void,
   onImportPortfolio: (file: Blob) => void,
 };
 
@@ -24,6 +27,21 @@ export default function PortfolioActions(props: Props) {
 
   return (
     <Col className="text-right">
+      <Button color="black" size="sm">
+        Import transactions from TD Ameritrade
+      </Button>
+      <Button color="link" onClick={props.onGetCodeFromTD} size="sm" type="button">
+        Login
+      </Button>
+      |
+      <Button color="link" onClick={props.onGetTokenFromTD} size="sm" type="button">
+        Authorize
+      </Button>
+      |
+      <Button color="link" onClick={props.onImportFromTD} size="sm" type="button">
+        Fetch
+      </Button>
+      <br></br>
       <Button color="link" size="sm" type="button">
         <Label className="label-button">
           <Input accept="text/csv" hidden onChange={handleImportTransactions} type="file" />

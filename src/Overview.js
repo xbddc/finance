@@ -220,10 +220,14 @@ class Overview extends React.Component<Props, State> {
       const transactions = this.props.transactions.filter(
         transaction => transaction.symbol === symbol
       );
-      const totalShares = transactions.reduce(
+      let totalShares = transactions.reduce(
         (prev, curr) => prev + curr.shares * (curr.type.search('Buy') >= 0 ? 1 : -1),
         0
       );
+
+      if (totalShares > -0.0001 && totalShares < 0.0001) {
+        totalShares = 0;
+      }
 
       if (!this.state.showClosedPosition && totalShares === 0) {
         return null;

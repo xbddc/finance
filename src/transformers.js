@@ -14,6 +14,49 @@ type GfTransaction = {
   Type: 'Buy' | 'Sell',
 };
 
+type TdTransaction = {
+  description: string,
+  transactionDate: string,
+  transactionSubType: string,
+  transactionItem: {
+    price: number,
+    amount: number,
+    instrument: {
+      symbol: string,
+    },
+  },
+  fees: Object,
+};
+
+export function transformTdToStocks(tdTransactions: Array<TdTransaction>): Array<Transaction> {
+  const lookupType = {
+    BY: 'Buy',
+    DR: 'Buy', // Dividend Reinvest
+    TC: 'Buy', // Trade Correction
+    SL: 'Sell',
+    CS: 'Buy to cover',
+    SS: 'Sell short',
+  };
+
+  return tdTransactions.map(transaction => {
+    if (transaction.transactionItem.instrument.assetType !== 'EQUITY') {
+      return null;
+    }
+
+    return {
+      cashValue: null,
+      commission: Object.values(transaction.fees).reduce((s, v) => s + v, 0),
+      date: transaction.transactionDate.split('T').shift(),
+      id: -1, // A real ID is added in the reducer.
+      notes: null,
+      price: transaction.transactionItem.price,
+      shares: transaction.transactionItem.amount,
+      symbol: transaction.transactionItem.instrument.symbol,
+      type: lookupType[transaction.transactionSubType] || `${transaction.transactionSubType} (${transaction.description})`,
+    }
+  }).filter(Boolean);
+}
+
 export function transformGfToStocks(gfTransactions: Array<GfTransaction>): Array<Transaction> {
   return gfTransactions.map(transaction => ({
     cashValue: transaction['Cash value'] === '' ? null : parseFloat(transaction['Cash value']),

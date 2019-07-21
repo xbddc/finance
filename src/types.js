@@ -152,6 +152,35 @@ type ImportTransactionsFileSuccessAction = {|
   +type: 'IMPORT_TRANSACTIONS_FILE_SUCCESS',
 |};
 
+type GetCodeFromTDAction = {|
+  +type: 'GET_CODE_FROM_TD_REQUEST',
+|};
+
+type GetTokenFromTDFailureAction = {|
+  +type: 'GET_TKOEN_FROM_TD_FAILURE',
+|};
+
+type GetTokenFromTDRequestAction = {|
+  +type: 'GET_TOKEN_FROM_TD_REQUEST',
+|};
+
+type GetTokenFromTDSuccessAction = {|
+  +accessToken: string,
+  +type: 'GET_TOKEN_FROM_TD_SUCCESS',
+|};
+
+type ImportFromTDFailureAction = {|
+  +type: 'IMPORT_FROM_TD_FAILURE',
+|};
+
+type ImportFromTDRequestAction = {|
+  +type: 'IMPORT_FROM_TD_REQUEST',
+|};
+
+type ImportFromTDSuccessAction = {|
+  +type: 'IMPORT_FROM_TD_SUCCESS',
+|};
+
 export type Action =
   | AddSymbolAction
   | AddTransactionAction
@@ -172,7 +201,14 @@ export type Action =
   | FetchQuotesSuccessAction
   | ImportTransactionsFileFailureAction
   | ImportTransactionsFileRequestAction
-  | ImportTransactionsFileSuccessAction;
+  | ImportTransactionsFileSuccessAction
+  | GetCodeFromTDAction
+  | GetTokenFromTDFailureAction
+  | GetTokenFromTDRequestAction
+  | GetTokenFromTDSuccessAction
+  | ImportFromTDFailureAction
+  | ImportFromTDRequestAction
+  | ImportFromTDSuccessAction;
 
 export type AppSettings = {|
   +pageSize: number,
@@ -190,6 +226,7 @@ export type AppState = {|
   +symbols: Array<string>,
   +transactions: Array<Transaction>,
   +updatedAt: ?number,
+  +accessToken: ?string,
 |};
 
 export type GetState = () => AppState;

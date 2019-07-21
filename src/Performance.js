@@ -289,6 +289,10 @@ class Performance extends React.Component<Props, State> {
         }
       });
 
+      if (totalShares > -0.0001 && totalShares < 0.0001) {
+        totalShares = 0;
+      }
+
       if (!this.state.showClosedPosition && totalShares === 0) {
         return null;
       }

@@ -170,6 +170,11 @@ export default function(state: AppState, action: Action): AppState {
         quotes: action.quotes,
         updatedAt: Date.now(),
       };
+    case 'GET_TOKEN_FROM_TD_SUCCESS':
+      return {
+        ...state,
+        accessToken: action.accessToken,
+      };
     default:
       return state;
   }

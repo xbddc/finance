@@ -2,13 +2,17 @@
 
 import type { Dispatch, GetState, Transaction } from './types';
 import csvParse from 'csv-parse/lib/es5/sync';
-import { transformGfToStocks } from './transformers';
+import axios from 'axios';
+import querystring from 'querystring';
+import { transformTdToStocks, transformGfToStocks } from './transformers';
 
 const IEX_ROOT = 'https://cloud.iexapis.com/stable';
 const IEX_TOKEN = '__YOUR_TOKEN_HERE__';
 
 const TD_ROOT = 'https://api.tdameritrade.com/v1';
 const TD_TOKEN = '__YOUR_TOKEN_HERE__';
+const TD_ACCT = '__YOUR_TD_ACCOUNT_NUMBER_HERE__';
+const REDIRECT_URL = 'http://localhost/'; // same as your td app's redirect url
 
 export function addSymbol(symbol: string) {
   return { symbol, type: 'ADD_SYMBOL' };
@@ -169,6 +173,81 @@ export function fetchAllIexSymbols() {
       .catch(error => {
         dispatch({ error, type: 'FETCH_ALL_IEX_SYMBOLS_FAILURE' });
       });
+  };
+}
+
+export function getCodeFromTD() {
+  return function(dispatch: Dispatch) {
+    window.open('https://auth.tdameritrade.com/auth?' +
+    querystring.stringify({
+      response_type: 'code',
+      redirect_uri: REDIRECT_URL,
+      client_id: `${TD_TOKEN}@AMER.OAUTHAP`
+    }));
+    dispatch({ type: 'GET_CODE_FROM_TD_REQUEST' });
+  };
+}
+
+export function getTokenFromTD(code: string) {
+  return function(dispatch: Dispatch) {
+    dispatch({ type: 'GET_TOKEN_FROM_TD_REQUEST' });
+
+    axios.post(
+      `${TD_ROOT}/oauth2/token`,
+      querystring.stringify({
+        grant_type: 'authorization_code',
+        access_type: 'offline',
+        client_id: `${TD_TOKEN}@AMER.OAUTHAP`,
+        redirect_uri: REDIRECT_URL,
+        code,
+      }),
+    )
+    .then(r => {
+      const accessToken = r.data.refresh_token;
+      dispatch({ accessToken, type: 'GET_TOKEN_FROM_TD_SUCCESS' });
+    })
+    .catch(err => {
+      alert(err);
+      dispatch({ type: 'GET_TOKEN_FROM_TD_FAILURE' });
+    })
+  };
+}
+
+export function importFromTD() {
+  return function(dispatch: Dispatch, getState: GetState) {
+    dispatch({ type: 'IMPORT_FROM_TD_REQUEST' });
+    const { accessToken } = getState();
+
+    (async () => {
+      let allTransactions = [];
+      try {
+        const r = await axios.post(
+          `${TD_ROOT}/oauth2/token`,
+          querystring.stringify({
+            grant_type: 'refresh_token',
+            refresh_token: accessToken,
+            client_id: `${TD_TOKEN}@AMER.OAUTHAP`,
+          }),
+        );
+        const newToken = r.data.access_token;
+
+        for (let year = new Date().getFullYear(); year > 0; year -= 1) {
+          const r = await axios.get(`${TD_ROOT}/accounts/${TD_ACCT}/transactions?type=TRADE&startDate=${year}-01-01&endDate=${year}-12-31`, {
+            headers: { authorization: `Bearer ${newToken}`}
+          });
+
+          const transactions = transformTdToStocks(r.data);
+          if (transactions.length < 1) {
+            break;
+          }
+          transactions.reverse();
+          allTransactions = [...transactions, ...allTransactions];
+        }
+        dispatch(addTransactions(allTransactions));
+      } catch (err) {
+        alert(err);
+      }
+    })();
   };
 }
 

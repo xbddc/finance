@@ -8,6 +8,9 @@ import {
   deletePortfolio,
   downloadPortfolio,
   fetchAllQuotes,
+  getCodeFromTD,
+  getTokenFromTD,
+  importFromTD,
   importTransactionsFile,
 } from './actions';
 import AddSymbolForm from './AddSymbolForm';
@@ -67,6 +70,24 @@ class PortfolioContainer extends React.Component<Props> {
     this.props.dispatch(downloadPortfolio());
   };
 
+  handleGetCodeFromTD = () => {
+    this.props.dispatch(getCodeFromTD());
+  };
+
+  handleGetTokenFromTD = () => {
+    const url = prompt('Paste Return URL');
+    if (url) {
+      const code = url.split('?code=').pop();
+      if (code) {
+        this.props.dispatch(getTokenFromTD(code));
+      }
+    }
+  };
+
+  handleImportFromTD = () => {
+    this.props.dispatch(importFromTD());
+  };
+
   handleImportPortfolio = (file: Blob) => {
     this.props.dispatch(importTransactionsFile(file));
   };
@@ -99,6 +120,9 @@ class PortfolioContainer extends React.Component<Props> {
               onDeletePortfolio={this.handleDeletePortfolio}
               onDownloadPortfolio={this.handleDownloadPortfolio}
               onImportPortfolio={this.handleImportPortfolio}
+              onGetCodeFromTD={this.handleGetCodeFromTD}
+              onGetTokenFromTD={this.handleGetTokenFromTD}
+              onImportFromTD={this.handleImportFromTD}
             />
           </Row>
           {this.props.children}

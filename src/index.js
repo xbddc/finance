@@ -35,6 +35,7 @@ const initialState: AppState = {
   symbols: [],
   transactions: [],
   updatedAt: null,
+  accessToken: null,
 };
 
 const store = createStore(
@@ -53,6 +54,7 @@ const store = createStore(
         'symbols',
         'transactions',
         'updatedAt',
+        'accessToken',
       ],
       {
         key: 'default',
